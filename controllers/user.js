@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 var controller = {
     home: function (req, res) {
         return res.status(200).send({
-            message: 'Soy la home'
+            message: 'Soy la home actualizada'
         });
     },
     test: function (req, res) {
