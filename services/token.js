@@ -6,7 +6,7 @@ const config = require('../config')
 
 function createToken(user) {
     const payload = {
-        sub: user._id,
+        sub: user[0]._id,
         iat: moment().unix(),
         exp: moment().add(14, 'days').unix()
     }
@@ -26,6 +26,7 @@ function decodeToken(token) {
                 })
             }
 
+            //console.log(payload);
             resolve(payload.sub)
 
         } catch (error) {
@@ -39,4 +40,8 @@ function decodeToken(token) {
     return decoded
 }
 
-module.exports = {createToken, decodeToken}
+function verificaToken(token){
+    return jwt.decode(token, config.SECRET_TOKEN);
+}
+
+module.exports = {createToken, decodeToken, verificaToken}
