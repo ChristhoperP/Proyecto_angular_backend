@@ -16,12 +16,12 @@ function signUp(req, res) {
         email: req.body.email
     })
 
-    bcrypt.hash(req.body.password, 10, function(err, hash) {
+    bcrypt.hash(req.body.password, 10, async function(err, hash) {
 
-        if(err) return res.status(500).send({error: err});
+        if(err) return res.status(500).send({error1: err});
         user.password=hash;
 
-        user.save((err)=>{
+        await user.save((err)=>{
             if(err) return res.status(500).send({message: `Error al crear el usuario: ${err}`});
 
             return res.status(200).send({token: service.createToken(user)});
@@ -29,10 +29,10 @@ function signUp(req, res) {
     })
 }
 
-function signIn(req, res) {
+async function signIn(req, res) {
     if(!req.body.username || !req.body.password) return res.status(404).send({message: "Ingrese usuario o contraseña"})
 
-    User.find({$or:[{email: req.body.username}, {username: req.body.username}]}, (err,user) => {
+    await User.find({$or:[{email: req.body.username}, {username: req.body.username}]}, (err,user) => {
         if(err) return res.status(500).send({message: err})
         if(!user || Object.entries(user).length === 0) return res.status(404).send({message: "no existe el usuario"})
 

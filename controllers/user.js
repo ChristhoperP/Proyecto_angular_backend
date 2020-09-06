@@ -2,11 +2,12 @@
 
 var User = require('../models/user');
 const bcrypt = require('bcrypt');
+const rutas = require('../config');
 
 var controller = {
     home: function (req, res) {
         return res.status(200).send({
-            message: 'Soy la home actualizada'
+            message: 'Soy la home. Ruta mongodb: '+rutas.db+' port: '+rutas.port
         });
     },
     test: function (req, res) {
@@ -14,30 +15,15 @@ var controller = {
             message: 'Soy el metodo o accion test del controlador de project'
         });
     },
-    saveUser: function (req, res){
-        var user = new User();
+    getUser: async function (req, res){
 
-        var params = req.body;
-        user.nombre = params.nombre;
-        user.apellidos = params.apellidos;
-        user.username = params.username;
-        user.email = params.email;
+        await User.findById(req.user, (err,user) => {
+            if(err) return res.status(500).send({message: err});
+            if(!user || Object.entries(user).length === 0) return res.status(404).send({message: "no existe el usuario"});
 
-        //encriptando contraseña
-        bcrypt.hash(params.password, 10, function(err, hash) {
+            res.status(200).send(user);
+        })
 
-            if(err) return res.status(500).send({error: err});
-
-            user.password=hash;
-            user.save((err, userStored)=>{
-                if(err) return res.status(500).send({message: err});
-    
-                if(!userStored) return res.status(404).send({message: 'No se ha podido guardar el usuario'});
-    
-                return res.status(200).send({user: userStored});
-            });
-        });
-        
     }
 };
 
