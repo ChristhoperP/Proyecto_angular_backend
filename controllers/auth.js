@@ -1,47 +1,53 @@
 'use strict'
 
-const mongoose = require('mongoose')
-const User = require('../models/user')
+//const User = require('../models/user')
 const bcrypt = require('bcrypt')
 const service = require('../services/token')
 
+
+// Conexion a postgres
+const { pool } = require('../conexion');
+
+
 async function signUp(req, res) {
 
-    //VALIDAR DATOS ENVIADOS
-    /* await User.find({ username: req.body.username }, (err, user) => {
-        if (err) return res.status(500).send({ message: `Error al verificar username: ${err}` });
-        if (user) return res.status(400).send({ message: 'El username ya está en uso.' });
-    });
 
-    await User.find({ email: req.body.email }, (err, user) => {
-        if (err) return res.status(500).send({ message: `Error al verificar el email: ${err}` });
-        if (user) return res.status(400).send({ message: 'El email ya está en uso.' });
-    }); */
-
-    var user = new User({
+    var user = {
         nombre: req.body.nombre,
         apellidos: req.body.apellidos,
         username: req.body.username,
-        email: req.body.email
-    })
+        email: req.body.email,
+        password: ''
+    }
+
+    //var user2 = {};
 
     bcrypt.hash(req.body.password, 10, async function (err, hash) {
 
         if (err) return res.status(500).send({ error1: err });
         user.password = hash;
 
-        await user.save((err, user) => {
+        await pool.query('INSERT INTO users (nombre, apellidos, username, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING *', [user.nombre, user.apellidos, user.username, user.email, user.password], (err, respuesta) => {
+            if (err) return res.status(500).send({ message: `Error al crear el usuario: ${err.stack}` });
+
+            /* user2 = respuesta.rows[0];
+            user2._id = respuesta.rows[0].id; */
+            return res.status(200).send({ token: service.createToken(respuesta.rows[0]) });
+        });
+
+        //Con mongoose
+        /* await user.save((err, user) => {
             if (err) return res.status(500).send({ message: `Error al crear el usuario: ${err}` });
 
             return res.status(200).send({ token: service.createToken(user) });
-        })
+        }) */
     })
 }
 
 async function signIn(req, res) {
     if (!req.body.username || !req.body.password) return res.status(404).send({ message: "Ingrese usuario o contraseña" })
 
-    await User.find({ $or: [{ email: req.body.username }, { username: req.body.username }] }, (err, user) => {
+    /* await User.find({ $or: [{ email: req.body.username }, { username: req.body.username }] }, (err, user) => {
         if (err) return res.status(500).send({ message: err })
         if (!user || Object.entries(user).length === 0) return res.status(404).send({ message: "no existe el usuario" })
 
@@ -56,7 +62,39 @@ async function signIn(req, res) {
             })
         });
 
-    }).select('+password')
+    }).select('+password') */
+
+    const query = {
+        // give the query a unique name
+        name: 'login-user',
+        text: 'SELECT id, password FROM users WHERE email = $1 or username = $1 ',
+        values: [req.body.username],
+    }
+    // callback
+    await pool.query(query, (err, user) => {
+        if (err) {
+            return res.status(500).send({ message: `Error al comparar contraseñas: ${err.stack}` });
+        } 
+        if (!user.rows[0] || Object.entries(user.rows[0]).length === 0) return res.status(404).send({ message: "no existe el usuario" })
+
+        /* return res.status(200).send({
+            message: 'Te has logueado correctamente',
+            token: user.rows[0]
+        }) */
+
+        bcrypt.compare(req.body.password, user.rows[0].password, (err, result) => {
+            if (err) return res.status(500).send({ message: `Error al comparar contraseñas: ${err}` })
+            if (!result) return res.status(404).send({ message: 'La contraseña es incorrecta' })
+
+            /* var user2 = user.rows[0];
+            user2._id = user.rows[0].id; */
+
+            return res.status(200).send({
+                message: 'Te has logueado correctamente',
+                token: service.createToken(user.rows[0])
+            })
+        });
+    })
 }
 
 module.exports = {
