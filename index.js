@@ -3,6 +3,7 @@
 //var mongoose = require('mongoose');
 var app = require('./app');
 var rutas = require('./config');
+const { pool } = require('./conexion');
 
 /* mongoose.Promise = global.Promise;
 mongoose.connect(rutas.db, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -18,6 +19,12 @@ mongoose.connect(rutas.db, { useNewUrlParser: true, useUnifiedTopology: true })
 
 
 //Creación del servidor
+pool.query('SELECT NOW()', (err, res) => {
+    if(err) console.log(err)
+
+    console.log("Base de datos corriendo correctamente: " + res.rows[0].now)
+})
+
 app.listen(rutas.port, ()=>{
     console.log(`Servidor corriendo correctamente en el puerto: ${rutas.port}`);
 });
