@@ -20,9 +20,9 @@ mongoose.connect(rutas.db, { useNewUrlParser: true, useUnifiedTopology: true })
 
 //Creación del servidor
 pool.query('SELECT NOW()', (err, res) => {
-    if(err) console.log(err)
-
-    console.log("Base de datos corriendo correctamente: " + res.rows[0].now)
+    if(err) {console.log(err)}else{
+        console.log("Base de datos corriendo correctamente: " + res.rows[0].now)
+    }
 })
 
 app.listen(rutas.port, ()=>{
