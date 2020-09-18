@@ -6,11 +6,12 @@ const dbSocketAddr = '127.0.0.1:5432'.split(":")
 
 module.exports = {
     pool : new Pool({
-        //host: '34.69.154.201',
-        unix_socket: `${dbSocketPath}/${process.env.INSTANCE_CONNECTION_NAME}`,
+        host: '34.69.154.201',
+        //unix_socket: `${dbSocketPath}/${process.env.INSTANCE_CONNECTION_NAME}`,
         user: 'postgres',
         password: 'postgres',
-        host: dbSocketAddr[0], // e.g. '127.0.0.1'
-        port: dbSocketAddr[1], // e.g. '5432'
+        //host: dbSocketAddr[0], // e.g. '127.0.0.1'
+        //port: dbSocketAddr[1], // e.g. '5432'
+        port: 5432
     })
 }

@@ -1,5 +1,5 @@
 module.exports = {
-    port: process.env.PORT || 6000,
+    port: process.env.PORT || 7001,
     /* Local */
     //db: process.env.MONGODB || 'mongodb://localhost:',
     /* Production */
