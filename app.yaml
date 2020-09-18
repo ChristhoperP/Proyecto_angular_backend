@@ -14,3 +14,18 @@
 # [START gae_quickstart_yaml]
 runtime: nodejs10
 # [END gae_quickstart_yaml]
+
+  # The following env variables may contain sensitive information that grants
+# anyone access to your database. Do not add this file to your source control.
+env_variables:
+  DB_USER: postgres
+  DB_PASS: postgres
+  DB_NAME: postgres
+  # e.g. my-awesome-project:us-central1:my-cloud-sql-instance
+  CLOUD_SQL_CONNECTION_NAME: primeval-legacy-289419:us-central1:cactusbbdd
+
+beta_settings:
+  # The connection name of your instance, available by using
+  # 'gcloud beta sql instances describe [INSTANCE_NAME]' or from
+  # the Instance details page in the Google Cloud Platform Console.
+  cloud_sql_instances: primeval-legacy-289419:us-central1:cactusbbdd
